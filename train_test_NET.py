@@ -79,7 +79,7 @@ def train(path_file_train, model, config, device, Phi):
     file_nameList_original = os.listdir(path_file_train)
     hei = len(file_nameList_original)
     for epoches in range(0, config['cycle_index']):
-        print('轮数：', epoches)
+        print('epoch: ', epoches)
         for step in range(0, int(math.floor(hei / config['batch_size']))):
             num += 1
             original_date, cs_date = train_data(config['batch_size'], step, path_file_train, Phi)
@@ -146,7 +146,6 @@ def test(img, model, device, config, Phi):
     t_w = np.ceil(width / 33).astype(int)
     print('t_h,t_w', t_h, t_w)
     imag_block = cv.copyMakeBorder(img, 0, t_h * 33 - height, 0, t_w * 33 - width, cv.BORDER_DEFAULT)  # 翻转扩充
-
     cs_list = np.zeros([t_h * t_w, 272], dtype=float)
     num = 0
     for i in range(t_h):
@@ -164,7 +163,8 @@ def test(img, model, device, config, Phi):
     # cs_noise = random_noise(normalized_cs, 's&p', amount = 0.001)
     # # cs_noise = random_noise(normalized_cs, 'speckle', mean=0, var=0.01)
     # cs_list = cs_noise * (max_cs-min_cs) + min_cs
-
+    cv.imshow('cs',cs_list)
+    cv.waitKey(3000)
     cs_torch = torch.Tensor(cs_list).to(device)
     with torch.no_grad():
         output = model(cs_torch)
@@ -182,7 +182,6 @@ def test(img, model, device, config, Phi):
     ssim1 = ssim(np.uint8(img * 255), np.uint8(new_img * 255))
 
     return psnr1, ssim1, new_img, cs_list
-
 
 
 np.random.seed(1)
@@ -204,9 +203,7 @@ config = {
 }
 
 model = Net().to(device)
-# train(path_file_train, model, config, device, Phi)
-
-
+train(path_file_train, model, config, device, Phi)
 
 img = cv.imread('test_images11\\flinstones.png', 0) / 255.0
 time1 = time.time()
@@ -221,4 +218,3 @@ cv.imshow('cs_list', cs_list)
 cv.imshow('rimg', new_img)
 
 cv.waitKey(0)
-
