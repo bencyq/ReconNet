@@ -9,6 +9,7 @@ import numpy as np
 import os
 import torch
 from NET import Net
+from NET import ResNet
 import random
 import math
 import time
@@ -31,7 +32,6 @@ def train_data(batch_size, step, path_file_original, Phi):
     get_cs = []
     if step == 0:
         random.shuffle(hei_list)
-        print(hei_list)
     for i in range(step * batch_size, (step + 1) * batch_size):
         image = cv.imread(path_file_original + '\\' + file_nameList_original[hei_list[i]], 0)
         image = image / 255.0
@@ -79,7 +79,6 @@ def train(path_file_train, model, config, device, Phi):
     file_nameList_original = os.listdir(path_file_train)
     hei = len(file_nameList_original)
     for epoches in range(0, config['cycle_index']):
-        print('epoch: ', epoches)
         for step in range(0, int(math.floor(hei / config['batch_size']))):
             num += 1
             original_date, cs_date = train_data(config['batch_size'], step, path_file_train, Phi)
@@ -88,7 +87,7 @@ def train(path_file_train, model, config, device, Phi):
             model.train()
             output = model(cs_torch)
             loss = loss_fuction(original_torch, output)
-
+            print('\repoch: {}\tstep: {}\tlr: {}\tmean_loss: {}'.format(epoches, step, config['lr'], loss), end='')
             if num % 20 == 0:
                 mean_loss = dev(path_file_train, model, device, config['batch_size'], Phi)
                 if mean_loss < ps_q:
@@ -163,7 +162,7 @@ def test(img, model, device, config, Phi):
     # cs_noise = random_noise(normalized_cs, 's&p', amount = 0.001)
     # # cs_noise = random_noise(normalized_cs, 'speckle', mean=0, var=0.01)
     # cs_list = cs_noise * (max_cs-min_cs) + min_cs
-    cv.imshow('cs',cs_list)
+    cv.imshow('cs', cs_list)
     cv.waitKey(3000)
     cs_torch = torch.Tensor(cs_list).to(device)
     with torch.no_grad():
@@ -202,7 +201,9 @@ config = {
     # 'save_path': 'model5_noise.pth',
 }
 
-model = Net().to(device)
+# model = Net().to(device)
+model = ResNet()
+model = model.to(device)
 train(path_file_train, model, config, device, Phi)
 
 img = cv.imread('test_images11\\flinstones.png', 0) / 255.0
