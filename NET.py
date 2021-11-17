@@ -33,7 +33,6 @@ class Net(nn.Module):
 
 class ResNet(nn.Module):
 
-
     def __init__(self):
         super(ResNet, self).__init__()
         self.features1 = nn.Sequential(
@@ -88,11 +87,11 @@ class Residual(nn.Module):
         如果padding=(kernel_size-1)/2 那么经过卷积后，输入和输出的图像大小依旧相等，如果padding=0，那么必然会缩小（当然这里默认stride——步长为1）
         """
         # 第一层卷积神经网络
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1)  # 指定stride
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1)  # 指定stride
         # 在卷积神经网络的卷积层之后总会添加BatchNorm2d进行数据的归一化处理，这使得数据在进行Relu之前不会因为数据过大而导致网络性能的不稳定
         # nn.BatchNorm2d()的作用是根据统计的mean和var来对数据进行标准化
         self.bn1 = nn.BatchNorm2d(out_channels)
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
         # 第二层卷积神经网络
         self.bn2 = nn.BatchNorm2d(out_channels)
         # ？？？下采样    1.使得图像符合显示区域的大小     2.生成对应图像的缩略图    ？？？
